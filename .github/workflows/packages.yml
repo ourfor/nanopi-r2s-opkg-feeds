@@ -75,9 +75,9 @@ jobs:
           rm -rf kernel
           git clone --depth=1 https://github.com/fanck0605/friendlywrt-kernel.git kernel
           cd openwrt
-          ./scripts/patch-kernel.sh ../kernel target/linux/generic/backport-5.15
-          ./scripts/patch-kernel.sh ../kernel target/linux/generic/pending-5.15
-          ./scripts/patch-kernel.sh ../kernel target/linux/generic/hack-5.15
+          ./scripts/patch-kernel.sh ../kernel target/linux/generic/backport-5.10
+          ./scripts/patch-kernel.sh ../kernel target/linux/generic/pending-5.10
+          ./scripts/patch-kernel.sh ../kernel target/linux/generic/hack-5.10
           ./scripts/patch-kernel.sh ../kernel target/linux/octeontx/patches-5.10
           cp -a ./target/linux/generic/files/* ../kernel/
           cd ../kernel
