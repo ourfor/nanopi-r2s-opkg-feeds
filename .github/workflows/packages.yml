@@ -69,21 +69,21 @@ jobs:
           rm -rf friendlywrt/package/libs
           cp -r openwrt/package/libs friendlywrt/package/
       
-      # - name: Use Chuck's Kernel
-      #   run: |
-      #     cd friendlywrt-rk3328
-      #     rm -rf kernel
-      #     git clone -b nanopi-r2-v5.10.y --depth=1 https://github.com/friendlyarm/kernel-rockchip.git kernel
-      #     cd openwrt
-      #     ./scripts/patch-kernel.sh ../kernel target/linux/generic/backport-5.10
-      #     ./scripts/patch-kernel.sh ../kernel target/linux/generic/pending-5.10
-      #     ./scripts/patch-kernel.sh ../kernel target/linux/generic/hack-5.10
-      #     ./scripts/patch-kernel.sh ../kernel target/linux/octeontx/patches-5.10
-      #     cp -a ./target/linux/generic/files/* ../kernel/
-      #     cd ../kernel
-      #     wget -O net/netfilter/xt_FULLCONENAT.c https://raw.githubusercontent.com/Chion82/netfilter-full-cone-nat/master/xt_FULLCONENAT.c
-      #     wget -O ../fullcone_nat.patch https://github.com/fanck0605/nanopi-r2s/raw/openwrt-lienol/patches/001-kernel-add-full_cone_nat.patch
-      #     git apply ../fullcone_nat.patch
+      - name: Use Chuck's Kernel
+        run: |
+          cd friendlywrt-rk3328
+          rm -rf kernel
+          git clone -b nanopi-r2-v5.10.y --depth=1 https://github.com/friendlyarm/kernel-rockchip.git kernel
+          cd openwrt
+          ./scripts/patch-kernel.sh ../kernel target/linux/generic/backport-5.10
+          ./scripts/patch-kernel.sh ../kernel target/linux/generic/pending-5.10
+          ./scripts/patch-kernel.sh ../kernel target/linux/generic/hack-5.10
+          ./scripts/patch-kernel.sh ../kernel target/linux/octeontx/patches-5.10
+          cp -a ./target/linux/generic/files/* ../kernel/
+          cd ../kernel
+          wget -O net/netfilter/xt_FULLCONENAT.c https://raw.githubusercontent.com/Chion82/netfilter-full-cone-nat/master/xt_FULLCONENAT.c
+          wget -O ../fullcone_nat.patch https://github.com/fanck0605/nanopi-r2s/raw/openwrt-lienol/patches/001-kernel-add-full_cone_nat.patch
+          git apply ../fullcone_nat.patch
 
       - name: Update Feeds
         run: |
