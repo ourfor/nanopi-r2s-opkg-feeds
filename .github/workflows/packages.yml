@@ -35,7 +35,7 @@ jobs:
       - name: Save Private Key
         if: github.event_name == 'push'
         run: |
-          echo 'untrusted comment: private key 5e99c2573f29d764' > private.key
+          echo 'untrusted comment: private key 1f0e4ac921671797' > private.key
           echo "${{ secrets.private_key }}" >> private.key
 
       - name: Init Env
@@ -162,4 +162,4 @@ jobs:
           git init
           git add .
           git commit -m "Depoly at $(date +%Y-%m-%d)"
-          git push -f "https://${{ secrets.sec_token }}@github.com/songchenwen/nanopi-r2s-opkg-feeds.git" master:master
+          git push -f "https://${{ secrets.sec_token }}@github.com/ourfor/nanopi-r2s-opkg-feeds.git" master:master
