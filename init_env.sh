@@ -7,6 +7,3 @@ sudo apt-get -y upgrade
 sudo apt-get -y autoremove --purge
 sudo apt-get clean
 wget -O - https://raw.githubusercontent.com/friendlyarm/build-env-on-ubuntu-bionic/master/install.sh | bash
-
-git clone https://github.com/friendlyarm/repo
-sudo cp repo/repo /usr/bin/
