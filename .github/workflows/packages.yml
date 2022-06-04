@@ -38,13 +38,13 @@ jobs:
           echo 'untrusted comment: private key 1f0e4ac921671797' > private.key
           echo "${{ secrets.private_key }}" >> private.key
 
-      - name: Init Env
+      - name: Init Environment
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
           . init_env.sh
       
-      - name: openwrt Source
+      - name: Pull Source
         run: |
           . pull_source.sh
 
