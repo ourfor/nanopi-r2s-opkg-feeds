@@ -72,7 +72,7 @@ jobs:
       - name: Build Config
         run: |
           cd src
-          cat ../.config | grep "TARGET" > ../rk3328.config
+          cat ../.config > ../rk3328.config
           cat ../packages.seed >> ../rk3328.config
           cat ../rk3328.config > ../.config
           cat ../.config
@@ -88,9 +88,8 @@ jobs:
         env:
           IGNORE_ERRORS: 1
         run: |
-          cd src
-          cp ../.config openwrt
-          cd openwrt
+          cd src/openwrt
+          cp ../../.config .
           make
     
       - name: Collect Packages
