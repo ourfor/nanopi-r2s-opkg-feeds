@@ -31,6 +31,10 @@ jobs:
         with:
           ref: src
           fetch-depth: 0
+      
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        timeout-minutes: 5
 
       - name: Save Private Key
         if: github.event_name == 'push'
@@ -43,10 +47,6 @@ jobs:
           DEBIAN_FRONTEND: noninteractive
         run: |
           . init_env.sh
-      
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        timeout-minutes: 35
       
       - name: Pull Source
         run: |
