@@ -44,101 +44,64 @@ jobs:
         run: |
           . init_env.sh
       
-      - name: Friendlywrt Source
+      - name: openwrt Source
         run: |
-          . friendlywrt_source.sh
+          . pull_source.sh
 
-      - name: Change Feeds to Lean
+       
+      - name: Add Packages
         run: |
-          cd friendlywrt-rk3328
-          git clone https://github.com/coolsnowwolf/lede
-          cd friendlywrt
-          cp -r ../lede/package/lean package/
-          sed -i 's/^src-git luci.*/src-git luci https:\/\/github.com\/coolsnowwolf\/luci/' feeds.conf.default
-          sed -i 's/^src-git packages.*/src-git packages https:\/\/github.com\/coolsnowwolf\/packages/' feeds.conf.default
-        
-      - name: Add Packages to Lean
-        run: |
-          . add_packages_to_lean.sh
-
-      - name: Install Openwrt Libs
-        run: |
-          git config --global user.email "action@github.com" && git config --global user.name "GitHub Action"
-          cd friendlywrt-rk3328
-          git clone https://github.com/openwrt/openwrt
-          rm -rf friendlywrt/package/libs
-          cp -r openwrt/package/libs friendlywrt/package/
-      
-      - name: Use Chuck's Kernel
-        run: |
-          cd friendlywrt-rk3328
-          rm -rf kernel
-          git clone -b nanopi-r2-v5.10.y --depth=1 https://github.com/friendlyarm/kernel-rockchip.git kernel
-          cd openwrt
-          ./scripts/patch-kernel.sh ../kernel target/linux/generic/backport-5.10
-          ./scripts/patch-kernel.sh ../kernel target/linux/generic/pending-5.10
-          ./scripts/patch-kernel.sh ../kernel target/linux/generic/hack-5.10
-          ./scripts/patch-kernel.sh ../kernel target/linux/octeontx/patches-5.10
-          cp -a ./target/linux/generic/files/* ../kernel/
-          cd ../kernel
-          wget -O net/netfilter/xt_FULLCONENAT.c https://raw.githubusercontent.com/Chion82/netfilter-full-cone-nat/master/xt_FULLCONENAT.c
-          wget -O ../fullcone_nat.patch https://github.com/fanck0605/nanopi-r2s/raw/openwrt-lienol/patches/001-kernel-add-full_cone_nat.patch
-          git apply ../fullcone_nat.patch
+          . add_packages.sh
 
       - name: Update Feeds
         run: |
-          cd friendlywrt-rk3328/friendlywrt
+          cd src/openwrt
           ./scripts/feeds update -a
           ./scripts/feeds install -a
 
       - name: Install UPX
         run: |
-          mkdir -p friendlywrt-rk3328/friendlywrt/staging_dir/host/bin/
-          ln -s /usr/bin/upx-ucl friendlywrt-rk3328/friendlywrt/staging_dir/host/bin/upx
+          mkdir -p src/openwrt/staging_dir/host/bin/
+          ln -s /usr/bin/upx-ucl src/openwrt/staging_dir/host/bin/upx
   
       - name: Update Target.mk
         run: |
-          cd friendlywrt-rk3328/friendlywrt/include
+          cd src/openwrt/include
           sed -i 's/dnsmasq /dnsmasq-full default-settings luci /' target.mk
 
       - name: Build Config
         run: |
-          cd friendlywrt-rk3328
-          cat configs/config_rk3328 | grep "TARGET" > ../rk3328.config
+          cd src
+          cat ../.config | grep "TARGET" > ../rk3328.config
           cat ../packages.seed >> ../rk3328.config
-          cat ../rk3328.config > configs/config_rk3328
-          cat configs/config_rk3328
-      
-      - name: Clean src
-        run: |
-          cd friendlywrt-rk3328
-          rm -rf lede
-          rm -rf openwrt
+          cat ../rk3328.config > ../.config
+          cat ../.config
 
       - name: Add usign
         run: |
-          mkdir -p friendlywrt-rk3328/friendlywrt/staging_dir/host/bin/
+          mkdir -p src/openwrt/staging_dir/host/bin/
           sudo chmod a+x usign
-          cp usign friendlywrt-rk3328/friendlywrt/staging_dir/host/bin/
+          cp usign src/openwrt/staging_dir/host/bin/
           sudo mv usign /usr/bin/
 
-      - name: Build Friendlywrt
+      - name: Build openwrt
         env:
           IGNORE_ERRORS: 1
         run: |
-          cd friendlywrt-rk3328
-          ./build.sh nanopi_r2s.mk
+          cd src
+          cp ../.config .
+          make
     
       - name: Collect Packages
         run: |
-          cd friendlywrt-rk3328
+          cd src
           mkdir -p packagerepo/packages
-          mv friendlywrt/bin/packages/aarch64_cortex-a53/*/*.ipk packagerepo/packages/
-          mv friendlywrt/bin/targets/rockchip-rk3328/generic/packages/*.ipk packagerepo/packages/
-          cat -s friendlywrt/bin/packages/aarch64_cortex-a53/*/Packages > packagerepo/packages/Packages
-          cat -s friendlywrt/bin/targets/rockchip-rk3328/generic/packages/Packages >> packagerepo/packages/Packages
-          cat -s friendlywrt/bin/packages/aarch64_cortex-a53/*/Packages.manifest > packagerepo/packages/Packages.manifest
-          cat -s friendlywrt/bin/targets/rockchip-rk3328/generic/packages/Packages.manifest >> packagerepo/packages/Packages.manifest
+          mv openwrt/bin/packages/aarch64_cortex-a53/*/*.ipk packagerepo/packages/
+          mv openwrt/bin/targets/rockchip-rk3328/generic/packages/*.ipk packagerepo/packages/
+          cat -s openwrt/bin/packages/aarch64_cortex-a53/*/Packages > packagerepo/packages/Packages
+          cat -s openwrt/bin/targets/rockchip-rk3328/generic/packages/Packages >> packagerepo/packages/Packages
+          cat -s openwrt/bin/packages/aarch64_cortex-a53/*/Packages.manifest > packagerepo/packages/Packages.manifest
+          cat -s openwrt/bin/targets/rockchip-rk3328/generic/packages/Packages.manifest >> packagerepo/packages/Packages.manifest
           cd packagerepo/packages/
           gzip -k Packages
           ls *.ipk
@@ -146,14 +109,14 @@ jobs:
       - name: Sign Packages
         if: github.event_name == 'push'
         run: |
-          cd friendlywrt-rk3328
+          cd src
           cd packagerepo/packages
           usign -S -m Packages -s ../../../private.key -x Packages.sig
 
       - name: Push Changes
         if: github.event_name == 'push'
         run: |
-          cd friendlywrt-rk3328/packagerepo
+          cd src/packagerepo
           mkdir keys
           cp ../../keys/* keys/
           cp ../../README.md ./
