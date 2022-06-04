@@ -89,7 +89,8 @@ jobs:
           IGNORE_ERRORS: 1
         run: |
           cd src
-          cp ../.config .
+          cp ../.config openwrt
+          cd openwrt
           make
     
       - name: Collect Packages
